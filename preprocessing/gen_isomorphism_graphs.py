@@ -156,7 +156,7 @@ def build_mat_encoding(normal, normal_name, counter):
             buckets[fingerprint] = (adj.numpy().astype('int8').tolist(), label.numpy().astype('int8').tolist(), (normal_name))
 
     if counter > 0 and counter % 1e5 == 0:
-        with open('data/gpfs/projects/punim1875/arch2vec-readonly/data/data_darts_counter{}.json'.format(counter), 'w') as f:
+        with open('/data/gpfs/projects/punim1875/arch2vec-readonly/data/data_darts_counter{}.json'.format(counter), 'w') as f:
             json.dump(buckets, f)
 
     return counter
