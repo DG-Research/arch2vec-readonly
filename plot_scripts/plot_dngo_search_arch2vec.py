@@ -5,7 +5,7 @@ from collections import defaultdict
 
 def plot_over_time_dngo_search_arch2vec(name, cmap=plt.get_cmap("tab10")):
     length = []
-    for i in range(1, 501):
+    for i in range(1, 6):
         f_name = 'saved_logs/bo/dim16/run_{}_{}-model-nasbench101.json'.format(i, name)
         if not os.path.exists(f_name):
             continue
@@ -21,7 +21,7 @@ def plot_over_time_dngo_search_arch2vec(name, cmap=plt.get_cmap("tab10")):
     fig = plt.figure()
     ax = fig.add_subplot(1, 2, 1)
     ax_test = fig.add_subplot(1, 2, 2)
-    for i in range(1, 501):
+    for i in range(1, 6):
         f_name = 'saved_logs/bo/dim16/run_{}_{}-model-nasbench101.json'.format(i, name)
         if not os.path.exists(f_name):
             continue

@@ -29,7 +29,7 @@ class Env(object):
             print("extract arch2vec embedding table...")
             dataset = load_json(data_path)
             self.model = Model(input_dim=args.input_dim, hidden_dim=args.hidden_dim, latent_dim=args.latent_dim,
-                                num_hops=args.hops, num_mlp_layers=args.mlps, dropout=args.dropout, **cfg['GAE']).cuda()
+                                num_hops=args.hops, num_mlp_layers=args.mlps, dropout=args.dropout, **cfg['GAE']).cpu()
             model_ckpt_path = os.path.join(self.dir_name, '{}'.format(args.model_path))
             if not os.path.exists(model_ckpt_path):
                 print("File {} does not exist.".format(model_ckpt_path))
@@ -43,8 +43,8 @@ class Env(object):
                 exit()
             print('save to {} ...'.format(self.f_path))
             for ind in range(len(dataset)):
-                adj = torch.Tensor(dataset[str(ind)]['module_adjacency']).unsqueeze(0).cuda()
-                ops = torch.Tensor(dataset[str(ind)]['module_operations']).unsqueeze(0).cuda()
+                adj = torch.Tensor(dataset[str(ind)]['module_adjacency']).unsqueeze(0).cpu()
+                ops = torch.Tensor(dataset[str(ind)]['module_operations']).unsqueeze(0).cpu()
                 adj, ops, prep_reverse = preprocessing(adj, ops, **cfg['prep'])
                 test_acc = dataset[str(ind)]['test_accuracy']
                 valid_acc = dataset[str(ind)]['validation_accuracy']
@@ -141,7 +141,7 @@ def select_action(state, policy):
     :return: selected action: 1 x dim
     """
     out = policy(state.view(1, state.shape[0]))
-    mvn = MultivariateNormal(out, 1.0*torch.eye(state.shape[0]).cuda())
+    mvn = MultivariateNormal(out, 1.0*torch.eye(state.shape[0]).cpu())
     action = mvn.sample()
     policy.saved_log_probs.append(torch.mean(mvn.log_prob(action)))
     return action
@@ -174,7 +174,7 @@ def finish_episode(policy, optimizer, baseline):
 
 
 def reinforce_search(env):
-    policy = Policy_LSTM(args.latent_dim, 128).cuda()
+    policy = Policy_LSTM(args.latent_dim, 128).cpu()
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
     counter = 0
     rt = 0
@@ -187,7 +187,7 @@ def reinforce_search(env):
     time_trace = []
     while rt < args.MAX_BUDGET:
         for c in range(args.bs):
-            state = state.cuda()
+            state = state.cpu()
             action = select_action(state, policy)
             state, reward, reward_test, time, other_info = env.step(action)
             policy.rewards.append(reward)
@@ -237,7 +237,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_path', type=str, default='rl', help='rl/bo (default: rl)')
     parser.add_argument('--saved_arch2vec', action="store_true", default=False)
     parser.add_argument('--dataset_name', type=str, default='cifar10_valid_converged', help='Select from | cifar100 | ImageNet16_120 | cifar10_valid | cifar10_valid_converged')
-    parser.add_argument('--model_path', type=str, default='model-nasbench201', help='The pretrained checkpoint to be loaded')
+    parser.add_argument('--model_path', type=str, default='model-nasbench201.pt', help='The pretrained checkpoint to be loaded')
     parser.add_argument('--EMA_momentum', type=float, default=0.95, help='EMA momentum for reward baseline')
     parser.add_argument('--MAX_BUDGET', type=float, default = 12000, help='The budget in seconds')
     parser.add_argument('--input_dim', type=int, default=7)

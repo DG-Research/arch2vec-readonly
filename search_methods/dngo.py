@@ -65,7 +65,7 @@ def expected_improvement_search():
     rt = 0.
     visited = {}
     best_trace = defaultdict(list)
-    features, valid_labels, test_labels, training_time = load_arch2vec(os.path.join('pretrained/dim-{}'.format(args.dim), args.emb_path))
+    features, valid_labels, test_labels, training_time = load_arch2vec(args.emb_path)
     features, valid_labels, test_labels, training_time = features.cpu().detach(), valid_labels.cpu().detach(), test_labels.cpu().detach(), training_time.cpu().detach()
     feat_samples, valid_label_samples, test_label_samples, time_samples, visited = get_init_samples(features, valid_labels, test_labels, training_time, visited)
 
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     parser.add_argument('--init_size', type=int, default=16, help='init samples')
     parser.add_argument('--topk', type=int, default=5, help='acquisition samples')
     parser.add_argument('--output_path', type=str, default='bo', help='bo')
-    parser.add_argument('--emb_path', type=str, default='arch2vec.pt')
+    parser.add_argument('--emb_path', type=str, default='')
     args = parser.parse_args()
     np.random.seed(args.seed)
     torch.manual_seed(args.seed)

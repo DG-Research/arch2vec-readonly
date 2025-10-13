@@ -179,7 +179,7 @@ def get_val_acc_vae(model, cfg, X_adj, X_ops, indices):
     indices_split = torch.split(indices, bs, dim=0)
     correct_ops_ave, mean_correct_adj_ave, mean_false_positive_adj_ave, correct_adj_ave, acc_ave = 0, 0, 0, 0, 0
     for i, (adj, ops, ind) in enumerate(zip(X_adj_split, X_ops_split, indices_split)):
-        adj, ops = adj.cuda(), ops.cuda()
+        adj, ops = adj.cpu(), ops.cpu()
         # preprocessing
         adj, ops, prep_reverse = preprocessing(adj, ops, **cfg['prep'])
         # forward

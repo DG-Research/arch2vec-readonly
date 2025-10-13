@@ -147,8 +147,8 @@ def build_mat_encoding(normal, normal_name, counter):
         normal_cell = [(item[1], int(item[0])) for item in normal_name]
         reduce_cell = normal_cell.copy()
         genotype = Genotype(normal=normal_cell, normal_concat=[2, 3, 4, 5], reduce=reduce_cell, reduce_concat=[2, 3, 4, 5])
-        model = Network(48, 1000, 14, False, genotype).cuda()
-        input = torch.randn(1, 3, 224, 224).cuda()
+        model = Network(48, 1000, 14, False, genotype).cpu()
+        input = torch.randn(1, 3, 224, 224).cpu()
         macs, params = profile(model, inputs=(input, ))
         if macs < 6e8:
             counter += 1

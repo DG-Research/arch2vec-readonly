@@ -30,10 +30,12 @@ class Env(object):
         if not save:
             print("extract arch2vec from {}".format(os.path.join(self.dir_name, self.model_path)))
             if not os.path.exists(os.path.join(self.dir_name, self.model_path)):
+                print("model is not available to load")
                 exit()
             dataset = load_json(data_path)
-            self.model = Model(input_dim=5, hidden_dim=128, latent_dim=16, num_hops=5, num_mlp_layers=2, dropout=0, **cfg['GAE']).cuda()
+            self.model = Model(input_dim=5, hidden_dim=128, latent_dim=16, num_hops=5, num_mlp_layers=2, dropout=0, **cfg['GAE']).cpu()
             self.model.load_state_dict(torch.load(os.path.join(self.dir_name, self.model_path).format(args.dim))['model_state'])
+            print(self.model.state_dict())
             self.model.eval()
             with torch.no_grad():
                 print("length of the dataset: {}".format(len(dataset)))
@@ -43,8 +45,8 @@ class Env(object):
                     exit()
                 print('save to {}'.format(self.f_path))
                 for ind in range(len(dataset)):
-                    adj = torch.Tensor(dataset[str(ind)]['module_adjacency']).unsqueeze(0).cuda()
-                    ops = torch.Tensor(dataset[str(ind)]['module_operations']).unsqueeze(0).cuda()
+                    adj = torch.Tensor(dataset[str(ind)]['module_adjacency']).unsqueeze(0).cpu()
+                    ops = torch.Tensor(dataset[str(ind)]['module_operations']).unsqueeze(0).cpu()
                     adj, ops, prep_reverse = preprocessing(adj, ops, **cfg['prep'])
                     test_acc = dataset[str(ind)]['test_accuracy']
                     valid_acc = dataset[str(ind)]['validation_accuracy']
@@ -134,7 +136,7 @@ def select_action(state, policy):
     :return: action: 1 x dim
     """
     mean = policy(state.view(1, state.shape[0]))
-    mvn = MultivariateNormal(mean, torch.eye(state.shape[0]).cuda())
+    mvn = MultivariateNormal(mean, torch.eye(state.shape[0]).cpu())
     action = mvn.sample()
     policy.saved_log_probs.append(torch.mean(mvn.log_prob(action)))
     return action
@@ -165,7 +167,7 @@ def finish_episode(policy, optimizer):
 
 def reinforce_search(env, args):
     """ implementation of arch2vec-REINFORCE """
-    policy = Policy_LSTM(args.dim, 128).cuda()
+    policy = Policy_LSTM(args.dim, 128).cpu()
     optimizer = optim.Adam(policy.parameters(), lr=1e-2)
     counter = 0
     BEST_VALID_ACC = 0.9505542318026224
@@ -180,7 +182,7 @@ def reinforce_search(env, args):
     time_trace = []
     while rt < MAX_BUDGET:
         for c in range(args.bs):
-            state = state.cuda()
+            state = state.cpu()
             action = select_action(state, policy)
             state, reward, reward_test, time = env.step(action)
             policy.rewards.append(reward)
@@ -223,10 +225,10 @@ if __name__ == '__main__':
     parser.add_argument("--seed", type=int, default=1, help="random seed")
     parser.add_argument('--cfg', type=int, default=4, help='configuration (default: 4)')
     parser.add_argument('--bs', type=int, default=16, help='batch size')
-    parser.add_argument('--dim', type=int, default=7, help='feature dimension')
+    parser.add_argument('--dim', type=int, default=16, help='feature dimension')
     parser.add_argument('--output_path', type=str, default='rl', help='rl/bo')
     parser.add_argument('--emb_path', type=str, default='arch2vec.pt')
-    parser.add_argument('--model_path', type=str, default='model-nasbench-101.pt')
+    parser.add_argument('--model_path', type=str, default='model-nasbench101.pt')
     parser.add_argument('--saved_arch2vec', action="store_true", default=False)
     args = parser.parse_args()
     cfg = configs[args.cfg]

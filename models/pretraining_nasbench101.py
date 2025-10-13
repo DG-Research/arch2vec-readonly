@@ -38,7 +38,7 @@ def pretraining_model(dataset, cfg, args):
     X_adj_train, X_ops_train, indices_train = _build_dataset(dataset, train_ind_list)
     X_adj_val, X_ops_val, indices_val = _build_dataset(dataset, val_ind_list)
     model = Model(input_dim=args.input_dim, hidden_dim=args.hidden_dim, latent_dim=args.dim,
-                   num_hops=args.hops, num_mlp_layers=args.mlps, dropout=args.dropout, **cfg['GAE']).cuda()
+                   num_hops=args.hops, num_mlp_layers=args.mlps, dropout=args.dropout, **cfg['GAE']).cpu()
     optimizer = optim.Adam(model.parameters(), lr=1e-3, betas=(0.9, 0.999), eps=1e-08)
     epochs = args.epochs
     bs = args.bs
@@ -54,7 +54,7 @@ def pretraining_model(dataset, cfg, args):
         Z = []
         for i, (adj, ops, ind) in enumerate(zip(X_adj_split, X_ops_split, indices_split)):
             optimizer.zero_grad()
-            adj, ops = adj.cuda(), ops.cuda()
+            adj, ops = adj.cpu(), ops.cpu()
             # preprocessing
             adj, ops, prep_reverse = preprocessing(adj, ops, **cfg['prep'])
             # forward
@@ -75,7 +75,7 @@ def pretraining_model(dataset, cfg, args):
         buckets = {}
         model.eval()
         for _ in range(args.latent_points):
-            z = torch.randn(7, args.dim).cuda()
+            z = torch.randn(7, args.dim).cpu()
             z = z * z_std + z_mean
             op, ad = model.decoder(z.unsqueeze(0))
             op = op.squeeze(0).cpu()
