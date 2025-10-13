@@ -30,5 +30,5 @@ export CONDA_PKGS_DIR=/data/gpfs/projects/punim1875/anaconda3/pkgs
 eval "$(conda shell.bash hook)"
 conda activate nas-vqvae-conda
 
-python /data/gpfs/projects/punim1875/arch2vec-readonly/preprocessing/gen_isomorphic_graphs.py
+python /data/gpfs/projects/punim1875/arch2vec-readonly/preprocessing/gen_isomorphism_graphs.py
 
