@@ -322,6 +322,9 @@ def pretraining_gae(dataset, cfg):
 
 
 def get_results_inference(model, z_mean, z_std, nasbench):
+    model_device = next(model.parameters()).device
+    z_mean = z_mean.to(model_device)
+    z_std = z_std.to(model_device)
     validity_counter = 0
     non_novelty_counter = 0
     novelty_counter = 0
@@ -350,11 +353,11 @@ def get_results_inference(model, z_mean, z_std, nasbench):
     train_bucket, train_strings = find_train_split(args.data, data_seed=args.seed, if_random=True)
     model.eval()
     for _ in range(args.latent_points):
-        z = torch.randn(8, args.latent_dim).cpu()
+        z = torch.randn(8, args.latent_dim, device=model_device)
         z = z * z_std + z_mean
         op, ad = model.decoder(z.unsqueeze(0))
-        op = op.squeeze(0).cpu()
-        ad = ad.squeeze(0).cpu()
+        op = op.squeeze(0).detach().cpu()
+        ad = ad.squeeze(0).detach().cpu()
         max_idx = torch.argmax(op, dim=-1)
         one_hot = torch.zeros_like(op)
         for i in range(one_hot.shape[0]):

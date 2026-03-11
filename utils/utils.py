@@ -143,6 +143,7 @@ def get_NN_acc(decoderNN, targets, inds):
 
 def get_val_acc(model, cfg, X_adj, X_ops, indices):
     model.eval()
+    model_device = next(model.parameters()).device
     bs = 500
     chunks = len(X_adj) // bs
     if len(X_adj) % bs > 0:
@@ -152,7 +153,7 @@ def get_val_acc(model, cfg, X_adj, X_ops, indices):
     indices_split = torch.split(indices, bs, dim=0)
     correct_ops_ave, mean_correct_adj_ave, mean_false_positive_adj_ave, correct_adj_ave, acc_ave = 0, 0, 0, 0, 0
     for i, (adj, ops, ind) in enumerate(zip(X_adj_split, X_ops_split, indices_split)):
-        adj, ops = adj.cuda(), ops.cuda()
+        adj, ops = adj.to(model_device), ops.to(model_device)
         # preprocessing
         adj, ops, prep_reverse = preprocessing(adj, ops, **cfg['prep'])
         # forward
@@ -170,6 +171,7 @@ def get_val_acc(model, cfg, X_adj, X_ops, indices):
 
 def get_val_acc_vae(model, cfg, X_adj, X_ops, indices):
     model.eval()
+    model_device = next(model.parameters()).device
     bs = 500
     chunks = len(X_adj) // bs
     if len(X_adj) % bs > 0:
@@ -179,7 +181,7 @@ def get_val_acc_vae(model, cfg, X_adj, X_ops, indices):
     indices_split = torch.split(indices, bs, dim=0)
     correct_ops_ave, mean_correct_adj_ave, mean_false_positive_adj_ave, correct_adj_ave, acc_ave = 0, 0, 0, 0, 0
     for i, (adj, ops, ind) in enumerate(zip(X_adj_split, X_ops_split, indices_split)):
-        adj, ops = adj.cpu(), ops.cpu()
+        adj, ops = adj.to(model_device), ops.to(model_device)
         # preprocessing
         adj, ops, prep_reverse = preprocessing(adj, ops, **cfg['prep'])
         # forward
@@ -271,8 +273,6 @@ def is_valid_darts(adj, ops):
     if sum(adj[:8,8]) == 0 or sum(adj[:8,9]) == 0:
         return False
     return True
-
-
 
 
 
