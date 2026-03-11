@@ -34,5 +34,5 @@ export NCCL_IB_GID_INDEX=7
 
 
 python run_scripts/summarize_nb201_runtime.py \
-    --raw-dir /data/gpfs/projects/punim1875/arch2vec-readonly/results/runtime_report_nb201/cuda/raw/ \
-    --out-dir /data/gpfs/projects/punim1875/arch2vec-readonly/results/runtime_report_nb201/cuda/summary
+    --raw-dir /data/gpfs/projects/punim1875/arch2vec-readonly/results/runtime_report_nb201_arch2vec/cuda/raw/ \
+    --out-dir /data/gpfs/projects/punim1875/arch2vec-readonly/results/runtime_report_nb201_arch2vec/cuda/summary/
